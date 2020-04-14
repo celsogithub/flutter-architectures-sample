@@ -7,7 +7,6 @@ class ChipsComponent extends StatefulWidget {
   final ValueChanged<String> onTapChip;
 
   ChipsComponent({
-    Key key,
     @required this.listChips,
     @required this.onTapChip
   });

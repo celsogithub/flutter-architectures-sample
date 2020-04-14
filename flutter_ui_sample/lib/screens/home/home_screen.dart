@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ui_sample/components/bottom_navigation_component.dart';
 import 'package:flutter_ui_sample/components/card_component.dart';
 import 'package:flutter_ui_sample/components/chips_component.dart';
+import 'package:flutter_ui_sample/models/category_model.dart';
 import 'package:flutter_ui_sample/models/todo_model.dart';
 import 'package:flutter_ui_sample/screens/tasks/add_todo.dart';
 
@@ -17,10 +18,10 @@ class _HomeScreenState extends State<HomeScreen> {
   int bottomIndex = 0;
   String selectedChip = "All";
 
-  List<Todo> todos = List.of([]);
-  List<Todo> completeTodos = List.of([]);
+  List<Todo> _todos = List.of([]);
+  List<Todo> _completeTodos = List.of([]);
 
-  final List<String> categories = List.of([
+  final List<String> _categories = List.of([
     "All",
     "Personal",
     "Work",
@@ -33,33 +34,35 @@ class _HomeScreenState extends State<HomeScreen> {
   });
 
 
-  void onBottomSelected(int index) {
+  void onBottomSelected(int index) => setState(() {
+    bottomIndex = index;
+  });
+
+  void addTodo(Todo todo) => setState(() {
+    _todos.add(todo);
+  });
+
+  void completeTodo(Todo todo) {
+    todo.complete = true;
     setState(() {
-      bottomIndex = index;
+      _todos.remove(todo);
+      _completeTodos.add(todo);
     });
   }
 
-  void addTodo(Todo todo) => setState(() {
-    todos.add(todo);
-  });
-
-  void completeTodo(Todo todo) => setState(() {
-    todos.remove(todo);
-    todo.complete = true;
-    completeTodos.add(todo);
-    print(completeTodos.length);
-  });
-
-  List<Todo> filteredTodo() {
-    if (bottomIndex == 0 && selectedChip == "All") return todos;
-    else if (bottomIndex == 1 && selectedChip == "All") return completeTodos;
-    else if (bottomIndex == 0 && todos.length > 0) return todos.where((todo) => todo.category.name == selectedChip).toList();
-    else if (bottomIndex == 1 && completeTodos.length > 0) return completeTodos.where((todo) => todo.category.name == selectedChip).toList();
-    return [];
+  List<Todo> filterTodo() {
+    if (bottomIndex == 0 && selectedChip == "All") return _todos;
+    else if (bottomIndex == 1 && selectedChip == "All") return _completeTodos;
+    else if (bottomIndex == 0 && _todos.length > 0) return _todos.where((todo) => todo.category.name == selectedChip).toList();
+    else if (bottomIndex == 1 && _completeTodos.length > 0) return _completeTodos.where((todo) => todo.category.name == selectedChip).toList();
+    else return [];
   }
 
   @override
   Widget build(BuildContext context) {
+
+    List<Todo> filteredTodo = filterTodo();
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Todo List"),
@@ -69,15 +72,15 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: <Widget>[
             ChipsComponent(
-                listChips: categories,
+                listChips: _categories,
                 onTapChip: onTapChip
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: filteredTodo().length,
+                itemCount: filteredTodo.length,
                 itemBuilder: (context, index) {
                   return CardComponent(
-                    todo: filteredTodo()[index],
+                    todo: filteredTodo[index],
                     onCompleteTask: completeTodo,
                   );
                 }
