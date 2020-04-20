@@ -91,7 +91,9 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final Todo result = await Navigator.push(context, MaterialPageRoute(builder: (_) => AddTodo()));
-          _todoListBloc.addTodo(result);
+          if (result != null) {
+            _todoListBloc.addTodo(result);
+          }
         },
         child: Icon(Icons.add),
         backgroundColor: Colors.blue,
