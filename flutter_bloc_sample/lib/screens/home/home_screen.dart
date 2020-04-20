@@ -67,18 +67,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 initialData: _todoListBloc.todos,
                 builder: (context, snapshot) {
 
-                  List<Todo> todoList = snapshot.connectionState == ConnectionState.waiting
-                      ? _todoListBloc.todos
-                      : snapshot.data;
+                  if (snapshot.hasData && snapshot.data.length > 0) {
+                    return ListView.builder(
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (context, index) {
+                          return CardComponent(
+                            todo: snapshot.data[index],
+                            onCompleteTask: _todoListBloc.completeTodo,
+                          );
+                        }
+                    );
+                  }
 
-                  return ListView.builder(
-                    itemCount: todoList.length,
-                    itemBuilder: (context, index) {
-                      return CardComponent(
-                        todo: todoList[index],
-                        onCompleteTask: _todoListBloc.completeTodo,
-                      );
-                    }
+                  return Center(
+                    child: Text("no tasks exits..."),
                   );
                 }
               ),
