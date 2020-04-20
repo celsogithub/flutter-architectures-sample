@@ -19,12 +19,7 @@ class TodoListBloc {
     input.add(_todos);
   }
 
-  void completeTodo(Todo todo) {
-    _todos.remove(todo);
-    todo.complete = true;
-    _todos.add(todo);
-    filterTodo(bottomIndex: 0);
-  }
+  void completeTodo(Todo todo) => todo.complete = true;
 
   void filterTodo({
     @required int bottomIndex,
