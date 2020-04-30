@@ -1,0 +1,328 @@
+From e707bfafe9f6ef71381be8cbf9dae83fb1a2e4a9 Mon Sep 17 00:00:00 2001
+From: Celso Fujii <celsogithub@gmail.com>
+Date: Wed, 29 Apr 2020 22:53:55 -0300
+Subject: [PATCH] Created unit and widget tests
+
+---
+ flutter_bloc_sample/.vscode/launch.json       | 13 ++++
+ .../lib/models/category_model.dart            | 13 ++++
+ .../lib/models/todo_model.dart                | 14 ++++
+ flutter_bloc_sample/pubspec.lock              |  7 ++
+ flutter_bloc_sample/pubspec.yaml              |  2 +-
+ .../test/matchers/matchers.dart               |  9 +++
+ flutter_bloc_sample/test/mocks/mocks.dart     |  4 +
+ .../test/unit/blocs/todolist_bloc_test.dart   | 74 +++++++++++++++++++
+ .../test/unit/models/category_model_test.dart | 13 ++++
+ flutter_bloc_sample/test/widget_test.dart     | 30 --------
+ .../test/widgets/add_todo_test.dart           | 33 +++++++++
+ 11 files changed, 181 insertions(+), 31 deletions(-)
+ create mode 100644 flutter_bloc_sample/.vscode/launch.json
+ create mode 100644 flutter_bloc_sample/test/matchers/matchers.dart
+ create mode 100644 flutter_bloc_sample/test/mocks/mocks.dart
+ create mode 100644 flutter_bloc_sample/test/unit/blocs/todolist_bloc_test.dart
+ create mode 100644 flutter_bloc_sample/test/unit/models/category_model_test.dart
+ delete mode 100644 flutter_bloc_sample/test/widget_test.dart
+ create mode 100644 flutter_bloc_sample/test/widgets/add_todo_test.dart
+
+diff --git a/flutter_bloc_sample/.vscode/launch.json b/flutter_bloc_sample/.vscode/launch.json
+new file mode 100644
+index 0000000..3287bb6
+--- /dev/null
++++ b/flutter_bloc_sample/.vscode/launch.json
+@@ -0,0 +1,13 @@
++{
++    // Use IntelliSense to learn about possible attributes.
++    // Hover to view descriptions of existing attributes.
++    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
++    "version": "0.2.0",
++    "configurations": [
++        {
++            "name": "Flutter",
++            "request": "launch",
++            "type": "dart"
++        }
++    ]
++}
+\ No newline at end of file
+diff --git a/flutter_bloc_sample/lib/models/category_model.dart b/flutter_bloc_sample/lib/models/category_model.dart
+index c9d5d53..405beaf 100644
+--- a/flutter_bloc_sample/lib/models/category_model.dart
++++ b/flutter_bloc_sample/lib/models/category_model.dart
+@@ -33,4 +33,17 @@ class Category {
+         return Colors.deepPurpleAccent;
+     }
+   }
++
++  @override
++  bool operator ==(Object other) =>
++      identical(this, other) ||
++          other is Category &&
++              runtimeType == other.runtimeType &&
++              type == other.type &&
++              color == other.color;
++
++  @override
++  int get hashCode =>
++      type.hashCode ^
++      color.hashCode;
+ }
+\ No newline at end of file
+diff --git a/flutter_bloc_sample/lib/models/todo_model.dart b/flutter_bloc_sample/lib/models/todo_model.dart
+index c106090..79a0785 100644
+--- a/flutter_bloc_sample/lib/models/todo_model.dart
++++ b/flutter_bloc_sample/lib/models/todo_model.dart
+@@ -12,4 +12,18 @@ class Todo {
+     this.complete = false
+   });
+ 
++  @override
++  bool operator ==(Object other) =>
++      identical(this, other) ||
++          other is Todo &&
++              runtimeType == other.runtimeType &&
++              task == other.task &&
++              category == other.category &&
++              complete == other.complete;
++
++  @override
++  int get hashCode =>
++      task.hashCode ^
++      category.hashCode ^
++      complete.hashCode;
+ }
+\ No newline at end of file
+diff --git a/flutter_bloc_sample/pubspec.lock b/flutter_bloc_sample/pubspec.lock
+index c73bd65..62244ca 100644
+--- a/flutter_bloc_sample/pubspec.lock
++++ b/flutter_bloc_sample/pubspec.lock
+@@ -95,6 +95,13 @@ packages:
+       url: "https://pub.dartlang.org"
+     source: hosted
+     version: "1.1.8"
++  mockito:
++    dependency: "direct dev"
++    description:
++      name: mockito
++      url: "https://pub.dartlang.org"
++    source: hosted
++    version: "4.1.1"
+   path:
+     dependency: transitive
+     description:
+diff --git a/flutter_bloc_sample/pubspec.yaml b/flutter_bloc_sample/pubspec.yaml
+index 2649536..4819c60 100644
+--- a/flutter_bloc_sample/pubspec.yaml
++++ b/flutter_bloc_sample/pubspec.yaml
+@@ -27,7 +27,7 @@ dependencies:
+ dev_dependencies:
+   flutter_test:
+     sdk: flutter
+-
++  mockito: ^4.1.1
+ 
+ # For information on the generic Dart part of this file, see the
+ # following page: https://dart.dev/tools/pub/pubspec
+diff --git a/flutter_bloc_sample/test/matchers/matchers.dart b/flutter_bloc_sample/test/matchers/matchers.dart
+new file mode 100644
+index 0000000..2218583
+--- /dev/null
++++ b/flutter_bloc_sample/test/matchers/matchers.dart
+@@ -0,0 +1,9 @@
++import 'package:flutter/material.dart';
++
++bool chipMatcher(Widget widget, String name) {
++  if (widget is ChoiceChip) {
++    final chipText = widget.label as Text;
++    return chipText.data == name;
++  }
++  return false;
++}
+diff --git a/flutter_bloc_sample/test/mocks/mocks.dart b/flutter_bloc_sample/test/mocks/mocks.dart
+new file mode 100644
+index 0000000..83cc318
+--- /dev/null
++++ b/flutter_bloc_sample/test/mocks/mocks.dart
+@@ -0,0 +1,4 @@
++import 'package:br/models/todo_model.dart';
++import 'package:mockito/mockito.dart';
++
++class MockTodo extends Mock implements Todo {}
+\ No newline at end of file
+diff --git a/flutter_bloc_sample/test/unit/blocs/todolist_bloc_test.dart b/flutter_bloc_sample/test/unit/blocs/todolist_bloc_test.dart
+new file mode 100644
+index 0000000..bdb171f
+--- /dev/null
++++ b/flutter_bloc_sample/test/unit/blocs/todolist_bloc_test.dart
+@@ -0,0 +1,74 @@
++import 'package:br/blocs/todolist_bloc.dart';
++import 'package:br/models/category_model.dart';
++import 'package:br/models/todo_model.dart';
++import 'package:flutter/material.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:mockito/mockito.dart';
++
++import '../../mocks/mocks.dart';
++
++void main() {
++    group('Todo List Block', () {
++      TodoListBloc todoListBloc;
++      
++      setUp(() {
++        todoListBloc = TodoListBloc();
++      });
++
++      tearDown(() {
++        todoListBloc.dispose();
++      });
++        
++      test('Should add a todo in todo\'s list', () {
++        // given
++        final todo = _buildFakeTodo();
++
++        // then
++        expect(todoListBloc.output, emits([todo]));
++
++        // when
++        todoListBloc.addTodo(todo);
++      });
++
++      test('Should complete a todo', () {
++        // given
++        final todo = _buildFakeTodo();
++
++        // when
++        todoListBloc.addTodo(todo);
++        todoListBloc.completeTodo(todo);
++
++        // Then
++        expect(todoListBloc.todos.isNotEmpty, true);
++        expect(todoListBloc.todos[0].complete, true);
++      });
++
++      test('Should filter todos by all categories and completed', () {
++        // given
++        final Todo todo1 = MockTodo();
++        when(todo1.complete).thenAnswer((_) => false);
++        todoListBloc.addTodo(todo1);
++
++        final Todo todo2 = MockTodo();
++        when(todo2.complete).thenAnswer((_) => false);
++        todoListBloc.addTodo(todo2);
++
++        // Then
++        expect(
++          todoListBloc.output, 
++          emits([todo1, todo2]),
++        );      
++
++        // when
++        todoListBloc.filterTodo(bottomIndex: 0);
++      });
++    });
++}
++
++Todo _buildFakeTodo() {
++  final CategoryType type = CategoryType.PERSONAL;
++  final Color color = Category.colorByName(type);
++  final Category category = Category(type: type, color: color);
++  final String task = 'Write a letter';
++  return Todo(task: task, category: category);
++}
+diff --git a/flutter_bloc_sample/test/unit/models/category_model_test.dart b/flutter_bloc_sample/test/unit/models/category_model_test.dart
+new file mode 100644
+index 0000000..d803843
+--- /dev/null
++++ b/flutter_bloc_sample/test/unit/models/category_model_test.dart
+@@ -0,0 +1,13 @@
++import 'package:br/models/category_model.dart';
++import 'package:flutter_test/flutter_test.dart';
++
++void main() {
++  group('When create a category', () {
++    test('Should return the color', () {
++      final categoryType = CategoryType.PERSONAL;
++      final color = Category.colorByName(categoryType);
++      final Category category = Category(type: categoryType, color: color);
++      expect(category.color, Category.colorByName(categoryType));
++    });
++  });
++}
+\ No newline at end of file
+diff --git a/flutter_bloc_sample/test/widget_test.dart b/flutter_bloc_sample/test/widget_test.dart
+deleted file mode 100644
+index 1885587..0000000
+--- a/flutter_bloc_sample/test/widget_test.dart
++++ /dev/null
+@@ -1,30 +0,0 @@
+-// This is a basic Flutter widget test.
+-//
+-// To perform an interaction with a widget in your test, use the WidgetTester
+-// utility that Flutter provides. For example, you can send tap and scroll
+-// gestures. You can also use WidgetTester to find child widgets in the widget
+-// tree, read text, and verify that the values of widget properties are correct.
+-
+-import 'package:flutter/material.dart';
+-import 'package:flutter_test/flutter_test.dart';
+-
+-import 'package:br/main.dart';
+-
+-void main() {
+-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+-    // Build our app and trigger a frame.
+-//    await tester.pumpWidget(MyApp());
+-
+-    // Verify that our counter starts at 0.
+-    expect(find.text('0'), findsOneWidget);
+-    expect(find.text('1'), findsNothing);
+-
+-    // Tap the '+' icon and trigger a frame.
+-    await tester.tap(find.byIcon(Icons.add));
+-    await tester.pump();
+-
+-    // Verify that our counter has incremented.
+-    expect(find.text('0'), findsNothing);
+-    expect(find.text('1'), findsOneWidget);
+-  });
+-}
+diff --git a/flutter_bloc_sample/test/widgets/add_todo_test.dart b/flutter_bloc_sample/test/widgets/add_todo_test.dart
+new file mode 100644
+index 0000000..0897070
+--- /dev/null
++++ b/flutter_bloc_sample/test/widgets/add_todo_test.dart
+@@ -0,0 +1,33 @@
++import 'package:br/screens/tasks/add_todo.dart';
++import 'package:flutter/material.dart';
++import 'package:flutter_test/flutter_test.dart';
++
++import '../matchers/matchers.dart';
++
++void main() {
++  group('When add todo is opened', () {
++    testWidgets('Should display description textfield',
++        (WidgetTester tester) async {
++      await tester.pumpWidget(MaterialApp(home: AddTodo()));
++      final descriptionTextField = find.byType(TextField);
++      expect(descriptionTextField, findsOneWidget);
++    });
++
++    testWidgets('Should display chip component', (WidgetTester tester) async {
++      await tester.pumpWidget(MaterialApp(home: AddTodo()));
++
++      ['PERSONAL', 'WORK', 'FAMILY', 'FRIENDS'].forEach((name) {
++        final chip = find.byWidgetPredicate(
++          (Widget widget) => chipMatcher(widget, name),
++        );
++        expect(chip, findsOneWidget);
++      });
++    });
++  });
++
++  testWidgets('Should display create button', (WidgetTester tester) async {
++    await tester.pumpWidget(MaterialApp(home: AddTodo()));
++    final createButton = find.text('Create');
++    expect(createButton, findsOneWidget);
++  });
++}
+-- 
+2.17.1
+
