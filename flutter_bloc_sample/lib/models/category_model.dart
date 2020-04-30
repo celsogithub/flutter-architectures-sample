@@ -33,4 +33,17 @@ class Category {
         return Colors.deepPurpleAccent;
     }
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is Category &&
+              runtimeType == other.runtimeType &&
+              type == other.type &&
+              color == other.color;
+
+  @override
+  int get hashCode =>
+      type.hashCode ^
+      color.hashCode;
 }
