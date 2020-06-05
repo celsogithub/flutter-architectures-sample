@@ -6,10 +6,13 @@ name: Test
 # events but only for the master branch
 on:
   push:
-    branches: [ master ]
+    branches:
+    - master
+    - bloc
   pull_request:
-    branches: [ master ]
-
+    branches:
+    - master
+    - bloc
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "test"
@@ -27,7 +30,7 @@ jobs:
       uses: subosito/flutter-action@v1.3.2
 
     # Install Flutter dependencies
-    - name: Instal Flutter dependencies
+    - name: Instal Dependencies
       run: flutter pub get
     
     # Run tests with coverage (by default the code coverage will be output to coverage/lcov.info)
