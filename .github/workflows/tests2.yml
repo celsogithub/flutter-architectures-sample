@@ -15,11 +15,17 @@ jobs:
       with:
         flutter-version: '1.17.2'
         channel: 'stable'
-    - run: flutter pub get
+    - name: Install Dependencies
+      working-directory: ./flutter_bloc_sample
+      run: flutter pub get
     # run static analys code
-    - run: flutter analyze
+    - name: Run static analys code
+      working-directory: ./flutter_bloc_sample
+      run: flutter analyze
     # run  flutter widgets tests  and unit tests
-    - run: flutter test --coverage
+    - name: Run tests
+      working-directory: ./flutter_bloc_sample
+      run: flutter test --coverage
     # Upload coverage reports to Codecov
     # https://github.com/marketplace/actions/codecov
     - name: Upload coverage to Codecov
