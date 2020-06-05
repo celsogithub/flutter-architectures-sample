@@ -2,13 +2,12 @@ import 'package:br/models/todo_model.dart';
 import 'package:flutter/material.dart';
 
 class CardComponent extends StatelessWidget {
-
   final Todo todo;
   final ValueChanged<Todo> onCompleteTask;
 
   CardComponent({
     this.todo,
-    this.onCompleteTask
+    this.onCompleteTask,
   }) : super(key: ObjectKey(todo));
 
   @override
@@ -26,7 +25,12 @@ class CardComponent extends StatelessWidget {
                 value: todo.complete,
                 onChanged: (bool value) => onCompleteTask(todo),
               ),
-              Text(todo.task, style: todo.complete ? TextStyle(decoration: TextDecoration.lineThrough) : null)
+              Text(
+                todo.task,
+                style: todo.complete
+                    ? TextStyle(decoration: TextDecoration.lineThrough)
+                    : null,
+              )
             ],
           ),
           decoration: BoxDecoration(

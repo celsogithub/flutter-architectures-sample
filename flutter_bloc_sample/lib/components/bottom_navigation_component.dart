@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
 class BottomNavigation extends StatefulWidget {
-
   final int bottomIndex;
   final ValueChanged<int> onBottomSelected;
 
   BottomNavigation({
     @required this.bottomIndex,
-    @required this.onBottomSelected
+    @required this.onBottomSelected,
   });
 
   @override
@@ -15,7 +14,6 @@ class BottomNavigation extends StatefulWidget {
 }
 
 class _BottomNavigationState extends State<BottomNavigation> {
-
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
