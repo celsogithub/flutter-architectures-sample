@@ -1,18 +1,9 @@
 # This is a basic workflow to help you get started with Actions
-
 name: Test
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
-on:
-  push:
-    branches:
-    - master
-    - bloc
-  pull_request:
-    branches:
-    - master
-    - bloc
+on: [push,pull_request]
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "test"
@@ -28,13 +19,22 @@ jobs:
     # Install Flutter to execute Flutter commands in later steps
     - name: Install Flutter
       uses: subosito/flutter-action@v1.3.2
-
+      with:
+        flutter-version: '1.17.2'
+        channel: 'stable'
     # Install Flutter dependencies
     - name: Instal Dependencies
+      working-directory: ./flutter_bloc_sample
       run: flutter pub get
+    
+    # Run static analysis code
+    - name: Static analysis code
+      working-directory: ./flutter_bloc_sample
+      run: flutter analyze
     
     # Run tests with coverage (by default the code coverage will be output to coverage/lcov.info)
     - name: Test app 
+      working-directory: ./flutter_bloc_sample
       run: flutter test --coverage
       
     # Publish coverage results using the previously defined token
